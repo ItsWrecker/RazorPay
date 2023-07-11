@@ -35,6 +35,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -77,15 +78,16 @@ class MainActivity : ComponentActivity() {
                         val navHost = rememberNavController()
                         NavHost(
                             modifier = Modifier.padding(it),
-                            navController = navHost, startDestination = "SearchPage"
+                            navController = navHost, startDestination = Destination.MainScreen.route
                         ) {
-                            composable("SearchPage", ) {
+                            composable(Destination.MainScreen.route) {
                                 SearchScreen(searchViewModel, navHost)
                             }
                             val movieKey = "imdbId"
                             composable(
-                                "MovieDetails/{$movieKey}", arguments = listOf(
-                                    navArgument("id") {
+                                Destination.DetailsScreen.route + "/{$movieKey}",
+                                arguments = listOf(
+                                    navArgument(movieKey) {
                                         type = NavType.StringType
                                     }
                                 )) {
@@ -117,7 +119,7 @@ class MainActivity : ComponentActivity() {
                         contentDescription = "Poster",
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(200.dp)
+                            .height(200.dp), contentScale = ContentScale.FillWidth
                     )
                 }
 
@@ -170,10 +172,12 @@ class MainActivity : ComponentActivity() {
                 verticalArrangement = Arrangement.Top,
                 horizontalAlignment = Alignment.Start
             ) {
-                itemsIndexed(state.movieList) { index, item ->
-                    OutlinedCard(modifier = Modifier.fillMaxWidth().clickable {
-                        navHost.navigate("MovieDetails"+"/${item.imdbId}")
-                    }) {
+                itemsIndexed(state.movieList) { _, item ->
+                    OutlinedCard(modifier = Modifier
+                        .fillMaxWidth()
+                        .clickable {
+                            navHost.navigate(Destination.DetailsScreen.route +  "/${item.imdbId}")
+                        }) {
                         Row(horizontalArrangement = Arrangement.Start) {
                             GlideImage(
                                 model = item.poster,
